@@ -28,6 +28,9 @@ public class BankLauncher {
    * Utilized only when log in
    */
   public static void bankInit() {
+    Banks = new ArrayList<>();
+    Banks.add(loggedBank);
+    
     // Complete this method
 
     // Wait dili siya mo loop. While? or Do-While?
