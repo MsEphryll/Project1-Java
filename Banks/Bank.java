@@ -2,9 +2,12 @@ package Banks;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.regex.Pattern;
 
 import Accounts.*;
 import Main.*;
+import Main.Field.StringFieldLengthValidator;
+import Main.Field.StringFieldValidator;
 
 public class Bank {
     private final int id;
@@ -34,6 +37,26 @@ public class Bank {
     public int getId() {
         return id;
     }
+
+    // public int setId(int id) {
+    // try {
+    // // Try parsing the provided ID as an integer
+    // int bId = Integer.parseInt(String.valueOf(id));
+
+    // // Check if the parsed ID is non-negative
+    // if (bId >= 0) {
+    // // If it's valid, set the ID
+    // this.id = bId;
+    // } else {
+    // System.out.println("Error: ID must be a non-negative integer.");
+    // }
+
+    // } catch (NumberFormatException e) {
+    // // If parsing fails, it means the provided ID is not an integer
+    // System.out.println("Error: ID must be an integer.");
+    // }
+    // return this.id;
+    // }
 
     public String getName() {
         return name;
@@ -126,63 +149,101 @@ public class Bank {
      *         information of the account user.
      */
     public ArrayList<Field<String, ?>> createNewAccount() {
-        // Complete this method
-        // <<======================================================================================================================
-
         ArrayList<Field<String, ?>> accountDetails = new ArrayList<>();
 
         // Field for Account Number
-        Field<String, String> accountNumberField = new Field<String, String>("Account Number", String.class, "",
-                new Field.StringFieldValidator());
-        accountDetails.add(accountNumberField);
+        // try {
+        Field<String, String> accountNumberField = new Field<>("Account number", String.class, "",
+                new StringFieldValidator());
+        // Compile the regex pattern outside the loop for efficiency
+        boolean validInput = false;
+        while (!validInput) {
 
-        try {
-            String accountNum = accountNumberField.getFieldValue();
-            if (accountNum.isEmpty()) {
-                throw new IllegalArgumentException("Acoount Number must not be empty! Please enter an Account Number.");
+            Pattern pattern = Pattern.compile("\\d+");
+            String input = (accountNumberField.getFieldName() + ": ");
+            // String input = accountNumberField.getFieldValue(); // Directly obtain user
+            // input. This method needs to be defined to capture user input.
+            accountNumberField.setFieldValue(input, true);
+
+            if (pattern.matcher(accountNumberField.getFieldValue()).matches()) {
+                // If input is numeric, set the field value and exit the loop
+                accountDetails.add(accountNumberField);
+                validInput = true;
+            } else {
+                // If input is not numeric, inform the user and the loop will continue
+                System.out.println("Account number must be numeric.");
             }
-        } catch (IllegalArgumentException iae) {
-            System.out.println(iae.getMessage());
         }
 
         // Field for First Name
-        Field<String, String> firstNameField = new Field<>("First Name", String.class, "",
-                new Field.StringFieldValidator());
-        accountDetails.add(firstNameField);
+        Field<String, String> firstNameField = new Field<>("First Name", String.class, "", new StringFieldValidator());
+        boolean fnameInput = false;
+        while (!fnameInput) {
 
-        try {
-            String fname = firstNameField.getFieldValue();
-            if (fname.isEmpty()) {
-                throw new IllegalArgumentException("First Name must be  filled out.");
+            Pattern pattern = Pattern.compile("^[A-Za-z\\s]+$");
+            String input = (firstNameField.getFieldName() + ": ");
+            firstNameField.setFieldValue(input, true);
+
+            if (pattern.matcher(firstNameField.getFieldValue()).matches()) {
+                // If input is valid, set the field value and exit the loop
+                accountDetails.add(firstNameField);
+                fnameInput = true; // Exit the loop
+            } else {
+                // If input is not valid, inform the user and the loop will continue
+                System.out.println("First name must only contain letters and spaces.");
             }
-        } catch (IllegalArgumentException iae) {
-            System.out.println(iae.getMessage());
         }
 
         // Field for Last Name
-        Field<String, String> lastNameField = new Field<>("Last Name", String.class, "",
-                new Field.StringFieldValidator());
-        accountDetails.add(lastNameField);
+        Field<String, String> lastNameField = new Field<>("Last Name", String.class, "", new StringFieldValidator());
+        boolean lnameInput = false;
+        while (!lnameInput) {
 
-        // Field for Email
-        Field<String, String> emailField = new Field<>("Email", String.class, "", new Field.StringFieldValidator());
-        accountDetails.add(emailField);
+            Pattern pattern = Pattern.compile("^[A-Za-z\\s]+$");
+            String input = (lastNameField.getFieldName() + ": ");
+            lastNameField.setFieldValue(input, true);
 
-        // Field for Account Pin
-        Field<String, Integer> pinField = new Field<>("PIN", String.class, 4, new Field.StringFieldLengthValidator());
-        accountDetails.add(pinField);
-
-        // User Input para kada Field
-        // Wait wala man diay getters ang Field.java sa Field Name
-        for (Field<String, ?> field : accountDetails) {
-            // Access unta si FieldName sa Field.java
-            System.out.print(field.getFieldName() + ": ");
-
-            field.setFieldValue("");
-            // or field.setFieldValue(scanner.next()); Is it more efficient?
-
+            if (pattern.matcher(lastNameField.getFieldValue()).matches()) {
+                accountDetails.add(lastNameField);
+                lnameInput = true; // Exit the loop
+            } else {
+                System.out.println("Last name must only contain letters and spaces.");
+            }
         }
 
+        // Field for Email
+        Field<String, String> emailField = new Field<>("Email", String.class, "", new StringFieldValidator());
+        boolean emailInput = false;
+        while (!emailInput) {
+
+            Pattern pattern = Pattern.compile(
+                    "^(?:(?!.*?[.]{2})[a-zA-Z0-9](?:[a-zA-Z0-9.+!%-]{1,64}|)|\\\"[a-zA-Z0-9.+!% -]{1,64}\\\")@[a-zA-Z0-9][a-zA-Z0-9.-]+(.[a-z]{2,}|.[0-9]{1,})$");
+            String input = (emailField.getFieldName() + ": ");
+            emailField.setFieldValue(input, true);
+
+            if (pattern.matcher(emailField.getFieldValue()).matches()) {
+                accountDetails.add(emailField);
+                emailInput = true; // Exit the loop
+            } else {
+                System.out.println("Email must only contain letters, @, _, and . symbols. e.g. example@gmail.com");
+            }
+        }
+
+        // Field for Account Pin
+        Field<String, Integer> pinField = new Field<>("PIN", String.class, 4, new StringFieldLengthValidator());
+        boolean pinInput = false;
+        while (!pinInput) {
+            Pattern pattern = Pattern.compile("\\d+");
+            String input = (pinField.getFieldName() + ": ");
+
+            pinField.setFieldValue(input, true);
+            if (pattern.matcher(pinField.getFieldValue()).matches()) {
+                accountDetails.add(pinField);
+                pinInput = true;
+            } else {
+                System.out.println("Pinfield number must be numeric.");
+            }
+        }
         return accountDetails;
     }
 
